@@ -2,9 +2,11 @@
  * Rock-Paper-Scissors Physics Arena
  */
 import { PhysicsEngine } from '../engine/physics.js';
+import { AudioEngine } from '../engine/audio.js';
 
 export const rpsArena = {
     engine: null,
+    audio: null,
     canvas: null,
     ctx: null,
     animationId: null,
@@ -24,6 +26,7 @@ export const rpsArena = {
     isOver: false,
     startTime: 0,
     speedBoosted: false,
+    lastDominantType: null,
 
     // DOM Elements for score
     scoreEls: {
@@ -54,6 +57,16 @@ export const rpsArena = {
         const startY = (this.height - size) / 2;
 
         this.bounds = { x: startX, y: startY, size: size };
+
+        // Init Audio
+        if (!this.audio) {
+            this.audio = new AudioEngine();
+        }
+        this.audio.init();
+        this.lastDominantType = null;
+
+        // Resume audio on user interaction (browser requirement)
+        this.canvas.addEventListener('click', () => this.audio.resume(), { once: true });
 
         // Init Physics
         this.engine = new PhysicsEngine();
@@ -93,6 +106,9 @@ export const rpsArena = {
         }
         if (this.engine) {
             this.engine.stop();
+        }
+        if (this.audio) {
+            this.audio.stopBackgroundMusic();
         }
         this.engine = null;
         this.counts = { rock: 0, paper: 0, scissors: 0 };
@@ -140,6 +156,11 @@ export const rpsArena = {
             });
 
             Composite.add(this.engine.engine.world, body);
+
+            // Play spawn sound (staggered to avoid overwhelming)
+            if (i % 10 === 0) {
+                setTimeout(() => this.audio.playSpawnSound(type), i * 5);
+            }
         }
 
         this.counts = { rock: total / 3, paper: total / 3, scissors: total / 3 };
@@ -209,6 +230,8 @@ export const rpsArena = {
     transform(body, newType) {
         const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
 
+        const oldType = body.gameType;
+
         this.counts[body.gameType]--;
         this.counts[newType]++;
         this.updateScoreboard();
@@ -216,6 +239,9 @@ export const rpsArena = {
         body.gameType = newType;
         body.gameEmoji = emojis[newType];
         body.label = newType;
+
+        // Play transformation sound
+        this.audio.playTransformSound(oldType, newType);
 
         // Reverted Mass update
     },
@@ -261,6 +287,26 @@ export const rpsArena = {
     update() {
         const engine = this.engine.engine;
         const bodies = window.Matter.Composite.allBodies(engine.world);
+
+        // Check for dominant type and play background music
+        if (!this.isOver) {
+            const total = this.counts.rock + this.counts.paper + this.counts.scissors;
+            const dominanceThreshold = 0.7; // 70% dominance
+
+            let dominantType = null;
+            if (this.counts.rock / total > dominanceThreshold) dominantType = 'rock';
+            else if (this.counts.paper / total > dominanceThreshold) dominantType = 'paper';
+            else if (this.counts.scissors / total > dominanceThreshold) dominantType = 'scissors';
+
+            if (dominantType !== this.lastDominantType) {
+                if (dominantType) {
+                    this.audio.startDominantMusic(dominantType);
+                } else {
+                    this.audio.stopBackgroundMusic();
+                }
+                this.lastDominantType = dominantType;
+            }
+        }
 
         // Check for Speed Boost (50 seconds)
         if (!this.speedBoosted && !this.isOver) {
