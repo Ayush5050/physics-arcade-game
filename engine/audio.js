@@ -11,6 +11,15 @@ export class AudioEngine {
         this.bgGain = null;
         this.currentDominantType = null;
         this.isInitialized = false;
+        this.isMuted = false;
+    }
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.masterGain) {
+            this.masterGain.gain.value = this.isMuted ? 0 : 0.5;
+        }
+        return this.isMuted;
     }
 
     init() {

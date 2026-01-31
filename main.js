@@ -12,6 +12,11 @@ class GameManager {
         // Navigation
         this.btnRps = document.getElementById('btn-rps');
 
+        // Controls
+        this.ctrlPause = document.getElementById('ctrl-pause');
+        this.ctrlRestart = document.getElementById('ctrl-restart');
+        this.ctrlAudio = document.getElementById('ctrl-audio');
+
         this.init();
     }
 
@@ -19,6 +24,11 @@ class GameManager {
         // Event Listeners
         this.btnRps.addEventListener('click', () => this.loadGame(rpsArena));
         this.restartBtn.addEventListener('click', () => this.restartCurrentGame());
+
+        // Control Bar Listeners
+        this.ctrlPause.addEventListener('click', () => this.handleTogglePause());
+        this.ctrlRestart.addEventListener('click', () => this.restartCurrentGame());
+        this.ctrlAudio.addEventListener('click', () => this.handleToggleAudio());
 
         // Default Load - Wait for layout to settle
         window.addEventListener('load', () => {
@@ -60,7 +70,21 @@ class GameManager {
     restartCurrentGame() {
         if (this.activeGame) {
             this.loadGame(this.activeGame);
+            // Reset icons on restart
+            this.ctrlPause.querySelector('.icon').innerText = '⏸️';
         }
+    }
+
+    handleTogglePause() {
+        if (!this.activeGame) return;
+        const isPaused = this.activeGame.togglePause();
+        this.ctrlPause.querySelector('.icon').innerText = isPaused ? '▶️' : '⏸️';
+    }
+
+    handleToggleAudio() {
+        if (!this.activeGame || !this.activeGame.audio) return;
+        const isMuted = this.activeGame.audio.toggleMute();
+        this.ctrlAudio.querySelector('.icon').innerText = isMuted ? '🔇' : '🔊';
     }
 
     onGameOver(winner) {

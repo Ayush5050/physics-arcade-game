@@ -27,6 +27,7 @@ export const rpsArena = {
     startTime: 0,
     speedBoosted: false,
     lastDominantType: null,
+    isPaused: false,
 
     // DOM Elements for score
     scoreEls: {
@@ -64,6 +65,7 @@ export const rpsArena = {
         }
         this.audio.init();
         this.lastDominantType = null;
+        this.isPaused = false;
 
         // Resume audio on user interaction (browser requirement)
         window.addEventListener('click', () => this.audio.resume(), { once: true });
@@ -113,6 +115,19 @@ export const rpsArena = {
         }
         this.engine = null;
         this.counts = { rock: 0, paper: 0, scissors: 0 };
+    },
+
+    togglePause() {
+        if (this.isOver) return false;
+        this.isPaused = !this.isPaused;
+
+        if (this.isPaused) {
+            if (this.engine) this.engine.stop();
+        } else {
+            if (this.engine) this.engine.start();
+        }
+
+        return this.isPaused;
     },
 
     spawnObjects() {
@@ -284,7 +299,10 @@ export const rpsArena = {
     loop() {
         if (!this.engine) return;
 
-        this.update();
+        if (!this.isPaused) {
+            this.update();
+        }
+
         this.draw();
         this.animationId = requestAnimationFrame(() => this.loop());
     },
@@ -439,7 +457,7 @@ export const rpsArena = {
         bodies.forEach(body => {
             if (body.label.startsWith('Wall')) return; // Already drawn
 
-            // Draw Emoji with intro animation and glow
+            // Draw Emoji with intro animation
             if (body.gameEmoji) {
                 let scale = 1;
                 let alpha = 1;
@@ -461,25 +479,6 @@ export const rpsArena = {
 
                 ctx.save();
                 ctx.globalAlpha = alpha;
-
-                // Color mapping for glow effects
-                const colors = {
-                    rock: { bg: 'rgba(139, 69, 19, 0.4)', glow: '#8B4513' },      // Brown
-                    paper: { bg: 'rgba(255, 255, 255, 0.3)', glow: '#FFFFFF' },   // White
-                    scissors: { bg: 'rgba(192, 192, 192, 0.4)', glow: '#C0C0C0' } // Silver
-                };
-
-                const color = colors[body.gameType];
-
-                // Draw colored circle background
-                ctx.beginPath();
-                ctx.arc(body.position.x, body.position.y, 16 * scale, 0, Math.PI * 2);
-                ctx.fillStyle = color.bg;
-                ctx.fill();
-
-                // Add glow effect
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = color.glow;
 
                 // Draw emoji
                 ctx.translate(body.position.x, body.position.y + 2);
