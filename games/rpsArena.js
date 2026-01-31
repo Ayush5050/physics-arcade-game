@@ -434,7 +434,7 @@ export const rpsArena = {
         bodies.forEach(body => {
             if (body.label.startsWith('Wall')) return; // Already drawn
 
-            // Draw Emoji with intro animation
+            // Draw Emoji with intro animation and glow
             if (body.gameEmoji) {
                 let scale = 1;
                 let alpha = 1;
@@ -456,9 +456,31 @@ export const rpsArena = {
 
                 ctx.save();
                 ctx.globalAlpha = alpha;
+
+                // Color mapping for glow effects
+                const colors = {
+                    rock: { bg: 'rgba(139, 69, 19, 0.4)', glow: '#8B4513' },      // Brown
+                    paper: { bg: 'rgba(255, 255, 255, 0.3)', glow: '#FFFFFF' },   // White
+                    scissors: { bg: 'rgba(192, 192, 192, 0.4)', glow: '#C0C0C0' } // Silver
+                };
+
+                const color = colors[body.gameType];
+
+                // Draw colored circle background
+                ctx.beginPath();
+                ctx.arc(body.position.x, body.position.y, 16 * scale, 0, Math.PI * 2);
+                ctx.fillStyle = color.bg;
+                ctx.fill();
+
+                // Add glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = color.glow;
+
+                // Draw emoji
                 ctx.translate(body.position.x, body.position.y + 2);
                 ctx.scale(scale, scale);
                 ctx.fillText(body.gameEmoji, 0, 0);
+
                 ctx.restore();
             }
         });
