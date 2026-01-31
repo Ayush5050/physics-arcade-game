@@ -450,7 +450,7 @@ export const rpsArena = {
         // Draw Objects
         const bodies = window.Matter.Composite.allBodies(this.engine.engine.world);
 
-        ctx.font = '24px serif';
+        ctx.font = '32px serif'; // Larger font for better visibility
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -478,6 +478,10 @@ export const rpsArena = {
                 }
 
                 ctx.save();
+
+                // Explicitly clear any leftover shadows or styles
+                ctx.shadowBlur = 0;
+                ctx.shadowColor = 'transparent';
                 ctx.globalAlpha = alpha;
 
                 // Draw emoji
