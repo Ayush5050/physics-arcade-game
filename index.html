@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Arcade</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h1 class="arcade-title">Physics Arcade</h1>
+            <nav class="game-list">
+                <button id="btn-rps" class="game-btn active">
+                    <span class="icon">🪨📄✂️</span>
+                    <span class="label">RPS Arena</span>
+                </button>
+                <!-- Future games can be added here -->
+            </nav>
+            <div class="sidebar-footer">
+                <p>v1.0.0</p>
+            </div>
+        </aside>
+
+        <!-- Main Game Area -->
+        <main class="game-container">
+            <div id="scoreboard" class="scoreboard">
+                <div class="score-item" style="color: #b0b0b0">
+                    <span>🪨</span>
+                    <span id="score-rock">0</span>
+                </div>
+                <div class="score-item" style="color: #4da6ff">
+                    <span>📄</span>
+                    <span id="score-paper">0</span>
+                </div>
+                <div class="score-item" style="color: #ff4d4d">
+                    <span>✂️</span>
+                    <span id="score-scissors">0</span>
+                </div>
+            </div>
+
+            <div id="game-overlay" class="overlay hidden">
+                <h2 id="overlay-title">Winner: Rock</h2>
+                <button id="btn-restart" class="restart-btn">Restart Game</button>
+            </div>
+            <canvas id="game-canvas"></canvas>
+        </main>
+    </div>
+
+    <!-- Vendor Libraries -->
+    <script src="./vendor/matter.min.js"></script>
+
+    <!-- Main Logic -->
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
