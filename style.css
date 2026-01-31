@@ -217,12 +217,13 @@ canvas {
 /* Controls Bar */
 .controls-bar {
     position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    left: 2rem;
+    transform: translateY(-50%);
     display: flex;
+    flex-direction: column;
     gap: 2rem;
-    padding: 1rem 2rem;
+    padding: 2rem 1rem;
     background: rgba(18, 18, 20, 0.95);
     backdrop-filter: blur(15px);
     border-radius: 60px;

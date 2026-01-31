@@ -65,6 +65,24 @@ export class PhysicsEngine {
     }
 
     /**
+     * Pause the physics simulation (keeps state)
+     */
+    pause() {
+        if (this.runner) {
+            this.Matter.Runner.stop(this.runner);
+        }
+    }
+
+    /**
+     * Resume the physics simulation
+     */
+    resume() {
+        if (this.runner && this.engine) {
+            this.Matter.Runner.run(this.runner, this.engine);
+        }
+    }
+
+    /**
      * Stop the physics simulation and clear the world
      */
     stop() {

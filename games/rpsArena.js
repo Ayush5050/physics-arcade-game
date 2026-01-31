@@ -122,9 +122,9 @@ export const rpsArena = {
         this.isPaused = !this.isPaused;
 
         if (this.isPaused) {
-            if (this.engine) this.engine.stop();
+            if (this.engine) this.engine.pause();
         } else {
-            if (this.engine) this.engine.start();
+            if (this.engine) this.engine.resume();
         }
 
         return this.isPaused;
