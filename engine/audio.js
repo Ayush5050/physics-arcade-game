@@ -16,51 +16,53 @@ export class AudioEngine {
     init() {
         if (this.isInitialized) return;
 
-        // Create audio context (requires user interaction)
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+            // Create audio context (might be suspended initially)
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Master gain for overall volume control
-        this.masterGain = this.audioContext.createGain();
-        this.masterGain.gain.value = 0.3; // 30% volume
-        this.masterGain.connect(this.audioContext.destination);
+            // Master gain for overall volume control
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = 0.5; // Bumped to 50% volume
+            this.masterGain.connect(this.audioContext.destination);
 
-        // Background music gain
-        this.bgGain = this.audioContext.createGain();
-        this.bgGain.gain.value = 0;
-        this.bgGain.connect(this.masterGain);
+            // Background music gain
+            this.bgGain = this.audioContext.createGain();
+            this.bgGain.gain.value = 0;
+            this.bgGain.connect(this.masterGain);
 
-        this.isInitialized = true;
+            this.isInitialized = true;
+        } catch (e) {
+            console.error("AudioEngine failed to initialize:", e);
+        }
     }
 
     // Play spawn sound for each object type
     playSpawnSound(type) {
-        if (!this.isInitialized) return;
+        if (!this.isInitialized || !this.audioContext) return;
 
         const now = this.audioContext.currentTime;
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
 
-        // Different tones for each type
         const tones = {
-            rock: { freq: 130.81, wave: 'square' },      // C3 - Deep, solid
-            paper: { freq: 261.63, wave: 'sine' },       // C4 - Light, smooth
-            scissors: { freq: 392.00, wave: 'triangle' } // G4 - Sharp, cutting
+            rock: { freq: 150, wave: 'square' },      // More punchy
+            paper: { freq: 300, wave: 'sine' },       // Clearer
+            scissors: { freq: 450, wave: 'triangle' } // Sharper
         };
 
-        const tone = tones[type];
+        const tone = tones[type] || tones.rock;
         oscillator.type = tone.wave;
         oscillator.frequency.setValueAtTime(tone.freq, now);
 
-        // Quick blip sound
         gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        gainNode.gain.linearRampToValueAtTime(0.2, now + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
 
         oscillator.connect(gainNode);
         gainNode.connect(this.masterGain);
 
         oscillator.start(now);
-        oscillator.stop(now + 0.15);
+        oscillator.stop(now + 0.2);
     }
 
     // Play transformation sound (when one converts another)
@@ -83,14 +85,14 @@ export class AudioEngine {
         oscillator.frequency.exponentialRampToValueAtTime(tones[toType], now + 0.2);
 
         gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.1, now + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
 
         oscillator.connect(gainNode);
         gainNode.connect(this.masterGain);
 
         oscillator.start(now);
-        oscillator.stop(now + 0.2);
+        oscillator.stop(now + 0.25);
     }
 
     // Start background music when one type dominates
@@ -159,8 +161,15 @@ export class AudioEngine {
 
     // Resume audio context (needed for some browsers)
     resume() {
+        if (!this.isInitialized) {
+            this.init();
+        }
         if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
+            this.audioContext.resume().then(() => {
+                console.log("AudioContext resumed successfully");
+            }).catch(e => {
+                console.error("Failed to resume AudioContext:", e);
+            });
         }
     }
 

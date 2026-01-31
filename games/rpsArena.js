@@ -66,7 +66,8 @@ export const rpsArena = {
         this.lastDominantType = null;
 
         // Resume audio on user interaction (browser requirement)
-        this.canvas.addEventListener('click', () => this.audio.resume(), { once: true });
+        window.addEventListener('click', () => this.audio.resume(), { once: true });
+        window.addEventListener('keydown', () => this.audio.resume(), { once: true });
 
         // Init Physics
         this.engine = new PhysicsEngine();
@@ -271,6 +272,10 @@ export const rpsArena = {
             if (rock > 0) winner = 'Rock';
             else if (paper > 0) winner = 'Paper';
             else winner = 'Scissors';
+
+            if (this.audio) {
+                this.audio.stopBackgroundMusic();
+            }
 
             this.onGameOver(winner);
         }
