@@ -129,6 +129,7 @@ export const rpsArena = {
 
             body.gameType = type;
             body.gameEmoji = emojis[type];
+            body.spawnTime = Date.now(); // Track spawn time for intro animation
 
             // Random Velocity
             const launchSpeed = 3;
@@ -387,9 +388,32 @@ export const rpsArena = {
         bodies.forEach(body => {
             if (body.label.startsWith('Wall')) return; // Already drawn
 
-            // Draw Emoji
+            // Draw Emoji with intro animation
             if (body.gameEmoji) {
-                ctx.fillText(body.gameEmoji, body.position.x, body.position.y + 2);
+                let scale = 1;
+                let alpha = 1;
+
+                // Intro animation (first 500ms after spawn)
+                if (body.spawnTime) {
+                    const elapsed = Date.now() - body.spawnTime;
+                    const introDuration = 500; // 500ms intro
+
+                    if (elapsed < introDuration) {
+                        const progress = elapsed / introDuration;
+                        // Bounce easing for scale
+                        scale = progress < 0.5
+                            ? 2 * progress * progress
+                            : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                        alpha = progress;
+                    }
+                }
+
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(body.position.x, body.position.y + 2);
+                ctx.scale(scale, scale);
+                ctx.fillText(body.gameEmoji, 0, 0);
+                ctx.restore();
             }
         });
     }
